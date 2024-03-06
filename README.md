@@ -64,15 +64,59 @@ This ends up with pre-trained LLM models that use RoPE to have a severe performa
 
 ---------------------------------------
 
-## Positional Interpolation:
+## Positional Interpolation (PI):
 
 To get positional embeddings to fall within the training range, this has led to the idea of positional interpolation where we directly **down-scale the position indices** so that the maximum position index matches the previous context window limit. This is done by simply downscaling and dividing the position index by a scaling factor.
 <figure>
-  <figcaption><i>Your Image Title Here</i></figcaption>
-  ![image](https://github.com/Math1019/Extend_Context_Window_Position_Interpolation/assets/111295407/c2e79589-94d7-48a2-bd16-5eeb592c27d0)
-<figure>
+  <figcaption><i>Extrapolation vs. Interpolation Down-Scale on RoPE</i></figcaption>
+  <img src="https://github.com/Math1019/Extend_Context_Window_Position_Interpolation/assets/111295407/c2e79589-94d7-48a2-bd16-5eeb592c27d0" alt="Alternative Text">
+</figure>
+
 The top graphic is showing a Llama model with a 2048 context window length. The red part of the graphic is when we have gone over the context window length via extrapolation. The bottom graphic shows that in positional interpolation, we downscale the position indices so that we get the 4096 position to still reside in a 2048 context length, which we can see with the increased number of dots in the bottom graphic.
 
+
+**
+The paper is focused on how to extend the context window when a LLM is using RoPE. Given that RoPE is defined by the $f(x,m)$ below:
+
+
+$f(x, m) = [(x_0 + ix_1)e^{im\theta_0}, (x_2 + ix_3)e^{im\theta_1}, ..., (x_{d-2} + ix_{d-1})e^{im\theta_{d/2-1}}]^T$ (1)
+
+where $i := \sqrt{-1}$ is the imaginary unit and $\theta_j = 10000^{-2j/d}$. 
+
+Using RoPE, the self-attention score $a(m, n)$
+
+$$
+= \text{Re}\left(f(q(m), f(k, n))\right)
+$$
+
+$$
+= \text{Re} \left[ \sum_{j=0}^{d/2-1} (q_{2j} + iq_{2j+1})(k_{2j} - ik_{2j+1})e^{i(m-n)\theta_j} \right]
+$$
+
+$$
+= \sum_{j=0}^{d/2-1} \left[ (q_{2j}k_{2j} + q_{2j+1}k_{2j+1}) \cos((m - n)\theta_j) + (q_{2j}k_{2j+1} - q_{2j+1}k_{2j}) \sin((m - n)\theta_j) \right]
+$$
+
+$$
+:= a(m - n)
+$$
+
+
+This gives the self-attention that is only dependent on relative position *m-n*.
+
+Thus to use the positional interpolation in RoPE so that we can scale down each input position index (m) to be within the range [0,L) to fit within the pre-trained context length, we need to change the *f(x,m)* function seen above to:
+
+$$
+f'(x,m) = f \left( x, \frac{mL}{L'} \right)
+$$
+
+Where:
+- x is the word embedding, which is without the position information
+- m is the token position/positional embedding
+- L is the original context window length/the max length
+- L' is the longer extended context window length.
+
+By aligning the ranges of position indices and relative distances before and after extension, the problem with attention score computation due to context window extension is mitigated, so the model is able to easier adapt as the interpolation bound is much tighter than the extrapolation bound for attention scores computed using the interpolated positions.
 
 ---------------------------------------
 
@@ -108,3 +152,12 @@ The positional embeddings with interpolation are used with the token embeddings 
 
 $$ e = W_e[:,x[\ell]] + W_p[:,\ell] $$ 
 
+---------------------------------------
+
+
+
+
+
+---------------------------------------
+## Critical Analysis: 
+There are a few things that could have been developed further
