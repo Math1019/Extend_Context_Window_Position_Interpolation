@@ -72,13 +72,13 @@ To get positional embeddings to fall within the training range, this has led to 
   <img src="https://github.com/Math1019/Extend_Context_Window_Position_Interpolation/assets/111295407/c2e79589-94d7-48a2-bd16-5eeb592c27d0" alt="Alternative Text">
 </figure>
 
-The top graphic is showing a Llama model with a 2048 context window length. The red part of the graphic is when we have gone over the context window length via extrapolation. The bottom graphic shows that in positional interpolation, we downscale the position indices so that we get the 4096 position to still reside in a 2048 context length, which we can see with the increased number of dots in the bottom graphic.
+The top graphic is showing a LLaMa model with a 2048 context window length. The red part of the graphic is when we have gone over the context window length via extrapolation. The bottom graphic shows that in positional interpolation, we downscale the position indices so that we get the 4096 position to still reside in a 2048 context length, which we can see with the increased number of dots in the bottom graphic.
 
 
 The paper is focused on how to extend the context window when a LLM is using RoPE. Given that RoPE is defined by the $f(x,m)$ below:
 
 
-$f(x, m) = [(x_0 + ix_1)e^{im\theta_0}, (x_2 + ix_3)e^{im\theta_1}, ..., (x_{d-2} + ix_{d-1})e^{im\theta_{d/2-1}}]^T$ (1)
+$f(x, m) = [(x_0 + ix_1)e^{im\theta_0}, (x_2 + ix_3)e^{im\theta_1}, ..., (x_{d-2} + ix_{d-1})e^{im\theta_{d/2-1}}]^T$
 
 where $i := \sqrt{-1}$ is the imaginary unit and $\theta_j = 10000^{-2j/d}$. 
 
