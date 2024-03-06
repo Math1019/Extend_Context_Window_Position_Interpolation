@@ -1,5 +1,5 @@
-# Extend_Context_Window_Position_Interpolation
-An overview of the Extending Context Window of Large Language Models via Positional Interpolation paper
+# Extending Context Window via Positional Interpolation
+A paper presentation of the Extending Context Window of Large Language Models via Positional Interpolation paper
 
 ## Overview
 There are certain limitations when implementing large language models (LLMs). One main limitation is the pre-defined context window size as many tasks or applications will exceed the context window size. When the context length exceeds the pre-trained settings, traditional transformer models tend to exhibit a significant degradation in performance. 
@@ -60,7 +60,7 @@ Many LLMs will have tasks that require long context windows, such as summarizing
 
 ![image](https://github.com/Math1019/Extend_Context_Window_Position_Interpolation/assets/111295407/cdf46237-6a31-48a7-b451-208606d85680)
 
-This ends up with pre-trained LLM models that use RoPE to have a severe performance issue once it passes the trained context length as it will have high attention scores that will hurt the self-attention mechanism, which is represented in the graphics below. The below graphics show that using extrapolation for RoPE will cause model performance to have higher attention scores, which represent increased model complexity and model performance to decline.
+This ends up with pre-trained LLM models that use RoPE to have a severe performance issue once it passes the trained context length as it will have high attention scores that will hurt the self-attention mechanism, which is represented in the graphics above. The above graphics show that using extrapolation for RoPE will cause model performance to have higher attention scores, which represent increased model complexity and model performance to decline.
 
 ---------------------------------------
 
@@ -75,7 +75,6 @@ To get positional embeddings to fall within the training range, this has led to 
 The top graphic is showing a Llama model with a 2048 context window length. The red part of the graphic is when we have gone over the context window length via extrapolation. The bottom graphic shows that in positional interpolation, we downscale the position indices so that we get the 4096 position to still reside in a 2048 context length, which we can see with the increased number of dots in the bottom graphic.
 
 
-**
 The paper is focused on how to extend the context window when a LLM is using RoPE. Given that RoPE is defined by the $f(x,m)$ below:
 
 
@@ -154,10 +153,42 @@ $$ e = W_e[:,x[\ell]] + W_p[:,\ell] $$
 
 ---------------------------------------
 
+## Experiments
+Since positional interpolation does not modify the model architecture or attention mechanism, it can be used for a variety of tasks that can help extend the context length. The paper covered many different experiments to evaluate PI effectiveness compare to extrapolation fine-tuned and non-fine-tuned models: 
+•	Long Sequence Language Modeling
+•	Passerkey Retrieval
+•	Benchmarks on Original Context Window Size of 2048
+•	Long Document Summarization
+
+Essentially, the paper saw that models fine-tuned with positional interpolation can achieve better perplexity with longer context windows while only seeing a very minor degradation in performance since the experiments showed that PI can help extend the context window up to 32 times successfully.
+
+This can be seen in the below graphic where we see that models fine-tuned with PI shows progressively lower perplexity with longer context window, while the perplexity of fine-tuned with extrapolation increases over the longer window context without even achieving the same context length.
 
 
+<p align="center">
+  <i>Long Sequence Language Modeling Experiment on LLaMA with RoPE</i>
+</p>
+<p align="center">
+  <img src="https://github.com/Math1019/Extend_Context_Window_Position_Interpolation/assets/111295407/268bcb12-5d42-4d93-b5f8-16b8e0e6f859" alt="Alternative Text">
+</p>
 
+The example experiments show how positional interpolation can effectively extend a model’s context window to be significantly larger through minimal fine-tuning, and it does not need to modify the model architecture or attention mechanism. The ability to preserve its original architecture gives positional interpolation versatility to be used in various tasks and help models achieve an extended context window.
 
 ---------------------------------------
-## Critical Analysis: 
-There are a few things that could have been developed further
+## Critical Analysis 
+There are a few things that could have been developed further in the paper.
+
+1. There is potential for extrapolation fine-tuning to use regularization to possibly end up in the [0,L] boundary, but the authors did not conduct a comparison to see how including regularization in extrapolation compares to positional interpolation.
+2. The authors discussed how PI can be used in Retrieval-augmented LLMs, few-shots learning, recurrent transformers, and memory transformers, which were all not included in the experiments covered in the paper. Additional work can be done by not only conducting experiments on these models, but the authors can also conduct experiments on tasks that are more sensitive to positional embeddings like question-answering.
+3. Experiment how PI performs with different models besides LLaMA or other positional embedding techniques as new discoveries occur. The authors specifically only focus on LLaMA and RoPE when conducting their experiments, but further work can be done to see how PI performs across different models and other embedding techniques.
+
+---------------------------------------
+## Additional Resources
+- Extending Context is Hard: https://kaiokendev.github.io/context
+- Extending the Context length of Language Models: Understanding Positional Interpolation (Blog Post 1): https://medium.com/@jain.sm/extending-the-context-length-of-language-models-a-deep-dive-into-positional-interpolation-a93140c69f6a
+- Position Interpolation: Extending Context Window Sizes in Large Language Models (Blog Post 2): https://medium.com/@jain.sm/position-interpolation-extending-context-window-sizes-in-large-language-models-ef19d0209a9f
+- Exploring Ways to Extend Context Length in Transformers: https://muhtasham.github.io/blog/posts/explore-context/
+- Extending context size via RoPE scaling (with Reddit Discussion Link): https://github.com/ggerganov/llama.cpp/discussions/1965 
+---------------------------------------
+## Citation:
+Chen, S., Wong, S., Chen, L., & Tian, Y. (2023). Extending context window of large language models via positional interpolation. Retrieved from http://arxiv.org/abs/2306.15595
