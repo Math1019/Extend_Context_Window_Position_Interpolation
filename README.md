@@ -155,10 +155,10 @@ $$ e = W_e[:,x[\ell]] + W_p[:,\ell] $$
 
 ## Experiments
 Since positional interpolation does not modify the model architecture or attention mechanism, it can be used for a variety of tasks that can help extend the context length. The paper covered many different experiments to evaluate PI effectiveness compare to extrapolation fine-tuned and non-fine-tuned models: 
-•	Long Sequence Language Modeling
-•	Passerkey Retrieval
-•	Benchmarks on Original Context Window Size of 2048
-•	Long Document Summarization
+  - Long Sequence Language Modeling
+  - Passerkey Retrieval
+  - Benchmarks on Original Context Window Size of 2048
+  - Long Document Summarization
 
 Essentially, the paper saw that models fine-tuned with positional interpolation can achieve better perplexity with longer context windows while only seeing a very minor degradation in performance since the experiments showed that PI can help extend the context window up to 32 times successfully.
 
